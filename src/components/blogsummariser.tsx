@@ -1,201 +1,169 @@
+'use client';
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Globe, FileText, Languages } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Globe, Sparkles, Link as LinkIcon } from 'lucide-react';
+import LoadingSpinner from './spinner';
+import SummaryCard from './summaryCard';
 // import { useToast } from '@/hooks/use-toast';
-import { extractTextFromUrl, generateSummary, translateToUrdu } from '@/utils/textProcessor';
+import { toast } from 'sonner';
 
-const BlogSummariser = () => {
+//
+const BlogSummarizer = () => {
   const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [extractedText, setExtractedText] = useState('');
-  const [englishSummary, setEnglishSummary] = useState('');
-  const [urduSummary, setUrduSummary] = useState('');
-  const [currentStep, setCurrentStep] = useState('');
-//   const { toast } = useToast();
+  const [summary, setSummary] = useState<{
+    english: string;
+    urdu: string;
+    title: string;
+  } | null>(null);
 
   const isValidUrl = (string: string) => {
     try {
       new URL(string);
-      return string.startsWith('http://') || string.startsWith('https://');
+      return true;
     } catch (_) {
       return false;
     }
   };
+//
+const postData = async (summary:string) => {
+  const res = await fetch("/api/blog", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      content: summary,
+    }),
+  });
 
+  const data = await res.json();
+  console.log("Saved with ID:", data.id);
+};
+
+//
   const handleSummarize = async () => {
-    if (!url) {
-      toast({
-        title: "URL Required",
-        description: "Please enter a valid blog URL",
-        variant: "destructive",
-      });
+    if (!url.trim()) {
+      toast(
+        "URL Required",{
+        description: "Please enter a blog URL to summarize"}
+      );
       return;
     }
 
     if (!isValidUrl(url)) {
-      toast({
-        title: "Invalid URL",
-        description: "Please enter a valid URL starting with http:// or https://",
-        variant: "destructive",
-      });
+      toast(
+        "InValid URL ",{
+        description: "Please enter a valid URL"}
+      );
       return;
     }
-
     setIsLoading(true);
-    setExtractedText('');
-    setEnglishSummary('');
-    setUrduSummary('');
+    setSummary(null);
 
-    try {
-      // Step 1: Extract text from URL
-      setCurrentStep('Extracting content from the blog...');
-      console.log('Starting text extraction from URL:', url);
-      const text = await extractTextFromUrl(url);
-      setExtractedText(text);
-      console.log('Extracted text length:', text.length);
-
-      // Step 2: Generate English summary
-      setCurrentStep('Generating English summary...');
-      console.log('Starting English summary generation');
-      const summary = await generateSummary(text);
-      setEnglishSummary(summary);
-      console.log('English summary generated:', summary.substring(0, 100) + '...');
-
-      // Step 3: Translate to Urdu
-      setCurrentStep('Translating to Urdu...');
-      console.log('Starting Urdu translation');
-      const urduTranslation = await translateToUrdu(summary);
-      setUrduSummary(urduTranslation);
-      console.log('Urdu translation completed');
-
-      toast({
-        title: "Success!",
-        description: "Blog has been successfully summarized in both languages",
+    // Simulate API call delay
+    setTimeout(() => {
+      // Mock summary data - replace with actual API call
+      setSummary({
+        title: "Understanding Modern Web Development",
+        english: "This comprehensive blog post explores the latest trends in modern web development, covering topics such as component-based architecture, state management, and performance optimization. The author discusses the evolution from traditional server-side rendering to modern client-side frameworks, highlighting the benefits of tools like React, Vue, and Angular. Key concepts include the importance of responsive design, accessibility standards, and the growing emphasis on user experience. The post also delves into emerging technologies like WebAssembly, Progressive Web Apps, and the impact of AI on development workflows.",
+        urdu: "یہ جامع بلاگ پوسٹ جدید ویب ڈیولپمنٹ میں تازہ ترین رجحانات کو دریافت کرتی ہے، جس میں کمپوننٹ پر مبنی آرکیٹیکچر، سٹیٹ مینجمنٹ، اور کارکردگی کی بہتری جیسے موضوعات شامل ہیں۔ مصنف نے روایتی سرور سائیڈ رینڈرنگ سے جدید کلائنٹ سائیڈ فریم ورکس کی طرف ارتقاء پر بحث کی ہے، React، Vue، اور Angular جیسے ٹولز کے فوائد کو اجاگر کرتے ہوئے۔ اہم تصورات میں ریسپانسو ڈیزائن کی اہمیت، رسائی کے معیارات، اور صارف کے تجربے پر بڑھتا ہوا زور شامل ہے۔"
       });
-
-    } catch (error) {
-      console.error('Error in summarization process:', error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to process the blog. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
       setIsLoading(false);
-      setCurrentStep('');
-    }
+      
+      toast("Summary Generated!",{
+        description: "Your blog has been successfully summarized in both languages.",
+      });
+    }, 2000);
+    await postData(summary?.english || "No summary generated");
+
+  };
+
+  const handleClear = () => {
+    setUrl('');
+    setSummary(null);
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Input Section */}
-      <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-2xl">
-            <Globe className="h-6 w-6 text-blue-600" />
-            Enter Blog URL
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex gap-2">
-            <Input
-              type="url"
-              placeholder="https://example.com/blog-post"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              className="flex-1 h-12 text-lg border-2 focus:border-blue-500 transition-colors"
-              disabled={isLoading}
-            />
-            <Button
-              onClick={handleSummarize}
-              disabled={isLoading || !url}
-              className="h-12 px-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-200 text-white font-semibold"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Processing...
-                </>
-              ) : (
-                'Summarize'
-              )}
-            </Button>
-          </div>
-          
-          {isLoading && currentStep && (
-            <div className="flex items-center gap-2 text-blue-600 bg-blue-50 p-3 rounded-lg">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span className="text-sm font-medium">{currentStep}</span>
+    <div className="space-y-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <Card className="p-8 shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
+          <div className="space-y-6">
+            <div className="relative">
+              <LinkIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5" />
+              <Input
+                type="url"
+                placeholder="Paste your blog URL here (e.g., https://example.com/blog-post)"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                className="pl-10 h-14 text-lg border-2 border-slate-200 focus:border-blue-400 transition-colors"
+                disabled={isLoading}
+              />
             </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Results Section */}
-      {(englishSummary || urduSummary) && (
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* English Summary */}
-          {englishSummary && (
-            <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-emerald-50 hover:shadow-xl transition-all duration-300 animate-fade-in">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl text-green-800">
-                  <FileText className="h-5 w-5" />
-                  English Summary
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="prose prose-sm max-w-none">
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                    {englishSummary}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Urdu Summary */}
-          {urduSummary && (
-            <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-pink-50 hover:shadow-xl transition-all duration-300 animate-fade-in">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl text-purple-800">
-                  <Languages className="h-5 w-5" />
-                  اردو خلاصہ (Urdu Summary)
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="prose prose-sm max-w-none">
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap text-right" dir="rtl">
-                    {urduSummary}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      )}
-
-      {/* Extracted Text Preview (for debugging) */}
-      {extractedText && (
-        <Card className="border-0 shadow-lg bg-gray-50">
-          <CardHeader>
-            <CardTitle className="text-lg text-gray-700">
-              Extracted Content Preview
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600 line-clamp-4">
-              {extractedText.substring(0, 300)}...
-            </p>
-            <p className="text-xs text-gray-500 mt-2">
-              Total characters extracted: {extractedText.length}
-            </p>
-          </CardContent>
+            
+            <div className="flex gap-4 justify-center">
+              <Button
+                onClick={handleSummarize}
+                disabled={isLoading || !url.trim()}
+                className="h-12 px-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 cursor-pointer"
+              >
+                <Sparkles className="mr-2 h-5 w-5" />
+                {isLoading ? 'Summarizing...' : 'Summarize Blog'}
+              </Button>
+              
+              {(url || summary) && (
+                <Button
+                  onClick={handleClear}
+                  variant="outline"
+                  className="h-12 px-6 border-2 hover:bg-slate-50 cursor-pointer"
+                  disabled={isLoading}
+                >
+                  Clear
+                </Button>
+              )}
+            </div>
+          </div>
         </Card>
-      )}
+      </motion.div>
+
+      <AnimatePresence mode="wait">
+        {isLoading && (
+          <motion.div
+            key="loading"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.3 }}
+            className="flex justify-center"
+          >
+            <LoadingSpinner />
+          </motion.div>
+        )}
+
+        {summary && !isLoading && (
+          <motion.div
+            key="summary"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -30 }}
+            transition={{ duration: 0.5 }}
+            className="space-y-6"
+          >
+            <SummaryCard
+              title={summary.title}
+              englishSummary={summary.english}
+              urduSummary={summary.urdu}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
 
-export default BlogSummariser;
+export default BlogSummarizer;
