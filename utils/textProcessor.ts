@@ -4,11 +4,8 @@ export const extractTextFromUrl = async (url: string): Promise<string> => {
   try {
     console.log('Attempting to extract text from URL:', url);
     
-    // Since we can't directly scrape websites from the frontend due to CORS,
-    // we'll simulate the text extraction for demo purposes
-    // In a real implementation, this would call a backend API or use a proxy service
-    
-    // Simulate API delay
+   
+    // API delay
     await new Promise(resolve => setTimeout(resolve, 2000));
     
     // Return mock blog content for demonstration
@@ -61,7 +58,7 @@ export const generateSummary = async (text: string): Promise<string> => {
     await new Promise(resolve => setTimeout(resolve, 1500));
     
     // For demo purposes, we'll create a mock summary
-    // In a real implementation, this would call an AI service like OpenAI, Anthropic, or similar
+    // In a real implementation, this would call an AI service like OpenAI or similar
     
     const sentences = text.split('.').filter(s => s.trim().length > 20);
     const keyPoints = sentences.slice(0, Math.min(5, Math.floor(sentences.length / 3)));
