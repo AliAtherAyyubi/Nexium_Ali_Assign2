@@ -4,21 +4,21 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { Globe, Sparkles, Link as LinkIcon } from 'lucide-react';
+import { Sparkles, Link as LinkIcon } from 'lucide-react';
 import LoadingSpinner from './spinner';
 import SummaryCard from './summaryCard';
-// import { useToast } from '@/hooks/use-toast';
-import { toast } from 'sonner';
-
+import { blogContent,blogSummary,urduTranslation } from '../../utils/textProcessor';
+import { showErrorToast,showSuccessToast,showWarningToast } from '../../utils/toast';
 //
 const BlogSummarizer = () => {
   const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [summary, setSummary] = useState<{
-    english: string;
-    urdu: string;
-    title: string;
-  } | null>(null);
+  const [Blog, setBlog] = useState({
+    title: '',
+    fullBlog: '',
+    summary: '',
+    urdu: '',
+  });
 
   const isValidUrl = (string: string) => {
     try {
@@ -28,61 +28,87 @@ const BlogSummarizer = () => {
       return false;
     }
   };
-//
-const postData = async (summary:string) => {
+//  Method to save blog to MongoDB 
+const saveToMongo = async (blog:string) => {
   const res = await fetch("/api/blog", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      content: summary,
+      blog: blog,
     }),
   });
 
-  const data = await res.json();
-  console.log("Saved with ID:", data.id);
+  if (res.ok) {
+    showSuccessToast("Blog Saved", "Blog content has been saved successfully into Cloud MongoDB.");
+  }
+  else{
+    showErrorToast("Save Failed", "There was an error into MongoDB server.");
+  }
+};
+
+const saveToSupabase = async (blog:string,urdu:string) => {
+  const res = await fetch("/api/summary", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      summary: blog,
+      urdu: urdu 
+    }),
+  });
+
+ if (res.ok) {
+    showSuccessToast("Data Saved", "Your summary has been saved successfully into Supabase.");
+  }
+  else{
+    showErrorToast("Save Failed", "There was an error into Supabase.");
+  }
 };
 
 //
   const handleSummarize = async () => {
     if (!url.trim()) {
-      toast(
-        "URL Required",{
-        description: "Please enter a blog URL to summarize"}
-      );
+      showWarningToast("URL Required", "Please enter a blog URL to summarize");
       return;
     }
 
     if (!isValidUrl(url)) {
-      toast(
-        "InValid URL ",{
-        description: "Please enter a valid URL"}
-      );
+      showErrorToast("Invalid URL", "The URL you entered is not valid. Please check and try again.");
       return;
     }
     setIsLoading(true);
-    setSummary(null);
+    setBlog({
+      title: '',
+      fullBlog: '',
+      summary: '',
+      urdu: '',
+    });
 
     // Simulate API call delay
     setTimeout(() => {
       // Mock summary data - replace with actual API call
-      setSummary({
-        title: "Understanding Modern Web Development",
-        english: "This comprehensive blog post explores the latest trends in modern web development, covering topics such as component-based architecture, state management, and performance optimization. The author discusses the evolution from traditional server-side rendering to modern client-side frameworks, highlighting the benefits of tools like React, Vue, and Angular. Key concepts include the importance of responsive design, accessibility standards, and the growing emphasis on user experience. The post also delves into emerging technologies like WebAssembly, Progressive Web Apps, and the impact of AI on development workflows.",
-        urdu: "یہ جامع بلاگ پوسٹ جدید ویب ڈیولپمنٹ میں تازہ ترین رجحانات کو دریافت کرتی ہے، جس میں کمپوننٹ پر مبنی آرکیٹیکچر، سٹیٹ مینجمنٹ، اور کارکردگی کی بہتری جیسے موضوعات شامل ہیں۔ مصنف نے روایتی سرور سائیڈ رینڈرنگ سے جدید کلائنٹ سائیڈ فریم ورکس کی طرف ارتقاء پر بحث کی ہے، React، Vue، اور Angular جیسے ٹولز کے فوائد کو اجاگر کرتے ہوئے۔ اہم تصورات میں ریسپانسو ڈیزائن کی اہمیت، رسائی کے معیارات، اور صارف کے تجربے پر بڑھتا ہوا زور شامل ہے۔"
+      setBlog({
+        title: "Understanding Artificial Intelligence",
+        fullBlog: blogContent,
+        summary: blogSummary,
+        urdu: urduTranslation
       });
       setIsLoading(false);
       
-      toast("Summary Generated!",{
-        description: "Your blog has been successfully summarized in both languages.",
-      });
+      showSuccessToast("Summary Generated", "Your blog has been successfully summarized in both languages.");
     }, 2000);
-    await postData(summary?.english || "No summary generated");
+    await saveToMongo(Blog.fullBlog);
+    await saveToSupabase(Blog.summary,Blog.urdu)
 
   };
 
   const handleClear = () => {
     setUrl('');
-    setSummary(null);
+    setBlog({
+      title: '',
+      fullBlog: '',
+      summary: '',
+      urdu: '',
+    });
   };
 
   return (
@@ -101,7 +127,7 @@ const postData = async (summary:string) => {
                 placeholder="Paste your blog URL here (e.g., https://example.com/blog-post)"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                className="pl-10 h-14 text-lg border-2 border-slate-200 focus:border-blue-400 transition-colors"
+                className="pl-10 h-14 text-lg border-2 w-full border-slate-200 focus:border-blue-400 transition-colors"
                 disabled={isLoading}
               />
             </div>
@@ -116,7 +142,7 @@ const postData = async (summary:string) => {
                 {isLoading ? 'Summarizing...' : 'Summarize Blog'}
               </Button>
               
-              {(url || summary) && (
+              {(url || Blog.title!='') && (
                 <Button
                   onClick={handleClear}
                   variant="outline"
@@ -145,7 +171,7 @@ const postData = async (summary:string) => {
           </motion.div>
         )}
 
-        {summary && !isLoading && (
+        {Blog.title!='' && !isLoading && (
           <motion.div
             key="summary"
             initial={{ opacity: 0, y: 30 }}
@@ -155,9 +181,10 @@ const postData = async (summary:string) => {
             className="space-y-6"
           >
             <SummaryCard
-              title={summary.title}
-              englishSummary={summary.english}
-              urduSummary={summary.urdu}
+              title={Blog.title}
+              blog={Blog.fullBlog}
+              englishSummary={Blog.summary}
+              urduSummary={Blog.urdu}
             />
           </motion.div>
         )}
