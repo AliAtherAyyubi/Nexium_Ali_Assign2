@@ -8,12 +8,14 @@ import { toast } from 'sonner';
 //
 interface SummaryCardProps {
   title: string;
+  blog:string;
   englishSummary: string;
   urduSummary: string;
 }
 
 const SummaryCard: React.FC<SummaryCardProps> = ({
   title,
+  blog,
   englishSummary,
   urduSummary,
 }) => {
@@ -53,21 +55,26 @@ const SummaryCard: React.FC<SummaryCardProps> = ({
     >
       <motion.div variants={itemVariants}>
         <Card className="p-6 shadow-xl border-0 bg-white/90 backdrop-blur-sm">
-          <div className="flex items-start gap-3 mb-4">
+          <div className="flex items-start gap-3 mb-3">
             <BookOpen className="h-6 w-6 text-blue-500 mt-1 flex-shrink-0" />
-            <div>
+            <div className=''>
               <h2 className="text-2xl font-bold text-slate-800 mb-2">{title}</h2>
-              <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+              {/* <Badge variant="secondary" className="bg-blue-100 text-blue-700">
                 Blog Summary
-              </Badge>
+              </Badge> */}
+              
             </div>
+            
           </div>
+          <p className="text-slate-700 leading-relaxed text-justify">
+            {blog}
+          </p>
         </Card>
       </motion.div>
 
       <motion.div variants={itemVariants}>
         <Card className="p-6 shadow-lg border-0 bg-gradient-to-br from-blue-50 to-indigo-50">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Globe className="h-5 w-5 text-blue-600" />
               <h3 className="text-lg font-semibold text-blue-800">English Summary</h3>
@@ -90,7 +97,7 @@ const SummaryCard: React.FC<SummaryCardProps> = ({
 
       <motion.div variants={itemVariants}>
         <Card className="p-6 shadow-lg border-0 bg-gradient-to-br from-purple-50 to-pink-50">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Globe className="h-5 w-5 text-purple-600" />
               <h3 className="text-lg font-semibold text-purple-800">اردو خلاصہ</h3>
