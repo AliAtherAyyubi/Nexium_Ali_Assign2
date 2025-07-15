@@ -24,11 +24,11 @@ export async function POST(req: Request) {
     let result;
     let db = await connectToDB();
     if (db){
-        let collection = db.collection("summary");
+        let collection = db.collection("blog");
         result = await collection.insertOne(body);
     }
 
-    return NextResponse.json({ success: true, id:result?.insertedId });
+    return NextResponse.json({ success: true, data: result }, { status: 200 });
   } catch (error) {
     console.log(error)
     return NextResponse.json({ error: "Failed to save data" }, { status: 500 });
