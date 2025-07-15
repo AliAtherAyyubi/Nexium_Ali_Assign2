@@ -24,7 +24,9 @@ const BlogSummarizer = () => {
     try {
       new URL(string);
       return true;
-    } catch (_) {
+    } catch (e) {
+      showErrorToast("Invalid URL", "Please enter a valid URL.");
+      console.log(e)
       return false;
     }
   };

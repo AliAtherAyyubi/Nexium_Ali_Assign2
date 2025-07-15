@@ -1,5 +1,4 @@
 import { MongoClient, ServerApiVersion } from "mongodb";
-import { env } from "process";
 
 const MONGO_URL= process.env.MONGO_URL || "";
 if (!process.env) {

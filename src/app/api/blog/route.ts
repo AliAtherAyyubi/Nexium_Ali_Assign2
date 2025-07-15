@@ -22,9 +22,9 @@ export async function POST(req: Request) {
     const body = await req.json();
     // console.log(body)
     let result;
-    let db = await connectToDB();
+    const db = await connectToDB();
     if (db){
-        let collection = db.collection("blog");
+        const collection = db.collection("blog");
         result = await collection.insertOne(body);
     }
 
