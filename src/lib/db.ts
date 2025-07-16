@@ -2,7 +2,7 @@ import { MongoClient, ServerApiVersion } from "mongodb";
 
 const MONGO_URL= process.env.MONGO_URL || "";
 if (!process.env) {
-  throw new Error("Mongo URI not found!");
+  throw new Error("Mongo URL not found!");
 }
 
 
