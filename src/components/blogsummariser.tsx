@@ -9,6 +9,7 @@ import LoadingSpinner from './spinner';
 import SummaryCard from './summaryCard';
 import { blogContent,blogSummary,urduTranslation } from '../../utils/textProcessor';
 import { showErrorToast,showSuccessToast,showWarningToast } from '../../utils/toast';
+import { Title } from './title';
 //
 const BlogSummarizer = () => {
   const [url, setUrl] = useState('');
@@ -25,7 +26,6 @@ const BlogSummarizer = () => {
       new URL(string);
       return true;
     } catch (e) {
-      showErrorToast("Invalid URL", "Please enter a valid URL.");
       console.log(e)
       return false;
     }
@@ -118,8 +118,9 @@ const saveToSupabase = async (blog:string,urdu:string) => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
+        transition={{ duration: 0.6, delay: 0.6 }}
       >
+        <Title/>
         <Card className="p-8 shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
           <div className="space-y-6">
             <div className="relative">

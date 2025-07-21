@@ -20,6 +20,7 @@ Blog Summarizer is a full-stack web application built using **Next.js 15**, desi
 | **Next.js 15** | App routing, API routes       |
 | **TypeScript** | Type safety across the project|
 | **TailwindCSS** | Styling and responsiveness   |
+| **Motion** | Animation effects    |
 | **ShadCN UI** | Pre-styled React components   |
 | **Supabase**   | Relational data storage (PostgreSQL) |
 | **MongoDB Atlas** | Non-relational full content storage |
@@ -48,7 +49,7 @@ Blog Summarizer is a full-stack web application built using **Next.js 15**, desi
 git clone https://github.com/aliatherayyubi/blog-summarizer.git
 cd blog-summarizer
 
-### 3.Add Environment Variables
+### 2.Add Environment Variables
 
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key

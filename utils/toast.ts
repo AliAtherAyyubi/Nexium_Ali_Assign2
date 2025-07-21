@@ -10,7 +10,8 @@ export const showErrorToast = (title: string, description?: string) => {
       color: "white", // White text color
       border: "1px solid #dc2626", // Darker red border
       boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)", // Subtle shadow       
-    }
+    },
+    
   });
 };
 
